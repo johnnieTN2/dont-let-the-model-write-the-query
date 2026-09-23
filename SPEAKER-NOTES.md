@@ -16,9 +16,9 @@ The rendered slides are in [`slides/`](slides/); the full deck is [`dont-let-the
 
 - Software architecture for repeatable chat responses over SQL data
 
-- John Ulett·  SageTechTN Vibe Coder
+- John Ulett· SageTechTN Vibe Coder
 
-- the model chooses  ·  the code composes
+- the model chooses · the code composes
 
 **Speaker notes**
 
@@ -34,7 +34,11 @@ The rendered slides are in [`slides/`](slides/); the full deck is [`dont-let-the
 
 - A recruiting firm
 
-- Two source systems. A decade of history.  CRM with 17k companies + 23k people  ATS with 23k people
+- Two source systems. A decade of history.
+
+- CRM with 17k companies + 23k people
+
+- ATS with 23k people
 
 - Non-technical users
 
@@ -146,7 +150,31 @@ The rendered slides are in [`slides/`](slides/); the full deck is [`dont-let-the
 
 **On the slide**
 
-`ROUTER › ENTITY RESOLUTION › SQL BUILD › GUARD › EXECUTE › FORMAT`
+- ROUTER
+
+- ›
+
+- ENTITY
+
+- RESOLUTION
+
+- ›
+
+- SQL
+
+- BUILD
+
+- ›
+
+- GUARD
+
+- ›
+
+- EXECUTE
+
+- ›
+
+- FORMAT
 
 - question
 
@@ -157,7 +185,9 @@ The rendered slides are in [`slides/`](slides/); the full deck is [`dont-let-the
 - deterministic code
 
 - The router is not choosing a query.
+
 - It answers one question first: what is one row of the answer?
+
 - A search? A person? A candidate in a pipeline? An aggregate bucket?
 
 **Speaker notes**
@@ -165,8 +195,6 @@ The rendered slides are in [`slides/`](slides/); the full deck is [`dont-let-the
 > This is the whole system. One model call at the front.
 >
 > It also pulls the values out of the sentence — but as raw strings, dropped into slots the template defines. You’ll see exactly what it returns in two slides.
->
->
 >
 > Note what is CODE. Resolving 'Northwind' to the canonical company name is code — fuzzy string matching, not embeddings, not a second model call. Building the SQL is code. Validating it is code. Rendering the table is code. The model appears once more at the end, and only to write a sentence of English prose over results that were already computed.
 >
@@ -180,19 +208,27 @@ The rendered slides are in [`slides/`](slides/); the full deck is [`dont-let-the
 
 **On the slide**
 
-```
-class RouterDecision(BaseModel):
-    intent: Literal["query", "expansion", "clarify_response", "chitchat"]
-    template_id: Optional[str] = None
-    question_type: Optional[Literal["count","list",
-                    "table","summary","scalar"]] = None
-    parameters: list[RouterParam] = Field(...)
-    expansions: list[str] = Field(...)
-    confidence: float = 0.0
-    clarifying_question: Optional[str] = None
-    limit: Optional[int] = None
-    sort: Optional[str] = None
-```
+- class RouterDecision(BaseModel):
+
+- intent: Literal["query", "expansion", "clarify_response", "chitchat"]
+
+- template_id: Optional[str] = None
+
+- question_type: Optional[Literal["count","list",
+
+- "table","summary","scalar"]] = None
+
+- parameters: list[RouterParam] = Field(...) Where clause
+
+- expansions: list[str] = Field(...) Select clause
+
+- confidence: float = 0.0
+
+- clarifying_question: Optional[str] = None
+
+- limit: Optional[int] = None
+
+- sort: Optional[str] = None
 
 - 9
 
@@ -226,27 +262,34 @@ class RouterDecision(BaseModel):
 
 **On the slide**
 
-```
-base_sql: |
-  SELECT {columns} FROM thrive_searches s
-  WHERE 1=1 {filters}
-  ORDER BY {order_by} LIMIT {limit}
- 
-filters:
-  client:  {sql: "AND s.company_name = %(client)s"}
-  status:  {sql: "AND s.status = %(status)s"}
-  title:   {sql: "AND s.job_title LIKE %(title)s"}
-```
+- base_sql: |
+
+- SELECT {columns} FROM thrive_searches s
+
+- WHERE 1=1 {filters}
+
+- ORDER BY {order_by} LIMIT {limit}
+
+- filters:
+
+- client: {sql: "AND s.company_name = %(client)s"}
+
+- status: {sql: "AND s.status = %(status)s"}
+
+- title: {sql: "AND s.job_title LIKE %(title)s"}
 
 - A config row in the database — not a file in the codebase.
+
 - New capability = an INSERT, not a deploy.
 
 - User values are never
+
 - interpolated — only bound.
 
 - That %(client)s stays a placeholder all the way into the driver.
 
 - Structural SQL is never
+
 - model-authored.
 
 - The model picks a sort KEY. A human wrote the ORDER BY behind it.
@@ -267,7 +310,9 @@ filters:
 
 - 16,384
 
-- filter combinations from 14 freely-combining filters
+- filter combinations from
+
+- 14 freely-combining filters
 
 - × 5
 
@@ -282,6 +327,7 @@ filters:
 - sort key, row limit, and follow-up state
 
 - One hand-written SQL frame.
+
 - The question space is infinite. The shape space is small — and it stops growing.
 
 **Speaker notes**
@@ -300,12 +346,11 @@ filters:
 
 **On the slide**
 
-```
-The user asked for "VP of Operations".  The query became %VP of Operations%.
-It matched zero live searches.
-```
+- The user asked for "VP of Operations". The query became %VP of Operations%.
 
-- The real titles:  Market VP Operations  ·  SVP Operations (IDD)  ·  COO/VP Operations
+- It matched zero live searches.
+
+- The real titles: Market VP Operations · SVP Operations (IDD) · COO/VP Operations
 
 - Everything worked.
 
@@ -320,6 +365,7 @@ It matched zero live searches.
 - Every job-title query in the system got permanently better.
 
 - If a model writing SQL fresh every call has nowhere to put that fix — except an ever-growing prompt.
+
 - Solved with PeopleIQ Framework.
 
 **Speaker notes**
@@ -334,53 +380,30 @@ It matched zero live searches.
 
 ---
 
-## Slide 10 · One Question, All The Way Down   1/4 — The question in, the struct out
+## Slide 10 · One Question, All The Way Down 2/4 — The SQL the code built
 
 ![Slide 10](slides/slide-10.png)
 
 **On the slide**
 
-- “open searches for Northwind with recruiter and candidate counts”
+- SELECT s.name AS `Search`, s.company_name AS `Client`,
 
-- ▼   everything the model said
+- s.assigned_to_name AS `Recruiter`,
 
-```
-{ "intent": "query",  "template_id": "template_search_01",
-  "question_type": "table",  "confidence": 0.94,
-  "parameters": [{"name":"client", "value":"Northwind"},
-                  {"name":"status", "value":"Open"}],
-  "expansions": ["recruiter", "candidate_count"] }
-```
+- s.candidacies_count AS `Candidates`
 
-- It translated “open” through a business glossary, and turned “with recruiter and candidate counts” into two
-- column keys — not into SQL. Into two strings that must match keys the template declares.
+- FROM thrive_searches s
 
-**Speaker notes**
+- WHERE 1=1 AND s.company_name = %(client)s
 
-> One question, all the way down. This is everything the model said.
->
-> Note it translated 'open' into the stored status value through a business glossary, and it turned 'with recruiter and candidate counts' into two named column requests — not into SQL, into two strings that have to match keys the template declares.
+- AND s.status = %(status)s
 
----
-
-## Slide 11 · One Question, All The Way Down   2/4 — The SQL the code built
-
-![Slide 11](slides/slide-11.png)
-
-**On the slide**
-
-```
-SELECT s.name AS `Search`, s.company_name AS `Client`,
-       s.assigned_to_name AS `Recruiter`,
-       s.candidacies_count AS `Candidates`
-FROM thrive_searches s
-WHERE 1=1 AND s.company_name = %(client)s
-           AND s.status = %(status)s
-ORDER BY s.created_at DESC LIMIT 100
-```
+- ORDER BY s.created_at DESC LIMIT 100
 
 - The model said “Northwind”. Code resolved that to “Northwind Health” by fuzzy match.
+
 - The user typed a company name. That text is still not in the SQL string.
+
 - There is no injection surface here — not because we sanitized well, but because user text never becomes SQL text.
 
 **Speaker notes**
@@ -391,9 +414,9 @@ ORDER BY s.created_at DESC LIMIT 100
 
 ---
 
-## Slide 12 · One Question, All The Way Down   3/4 — The guard
+## Slide 11 · One Question, All The Way Down 3/4 — The guard
 
-![Slide 12](slides/slide-12.png)
+![Slide 11](slides/slide-11.png)
 
 **On the slide**
 
@@ -416,9 +439,11 @@ ORDER BY s.created_at DESC LIMIT 100
 - THE SUBTLETY
 
 - The restriction is on what reaches the user — not what the query touches.
+
 - A foreign key in a JOIN is fine. The same column in the SELECT list is rejected.
 
 - The same guard runs on template SQL and on model-written SQL.
+
 - The trust boundary is in code, after the model — never in the prompt.
 
 **Speaker notes**
@@ -431,39 +456,41 @@ ORDER BY s.created_at DESC LIMIT 100
 
 ---
 
-## Slide 13 · One Question, All The Way Down   4/4 — Ask it again tomorrow
+## Slide 12 · One Question, All The Way Down 4/4 — Ask it again tomorrow
 
-![Slide 13](slides/slide-13.png)
+![Slide 12](slides/slide-12.png)
 
 **On the slide**
 
 - TODAY
 
-```
-SELECT s.name, s.company_name,
-       s.assigned_to_name, ...
-FROM thrive_searches s
-WHERE 1=1 AND ... = %(client)s
-ORDER BY s.created_at DESC
-```
+- SELECT s.name, s.company_name,
+
+- s.assigned_to_name, ...
+
+- FROM thrive_searches s
+
+- WHERE 1=1 AND ... = %(client)s
+
+- ORDER BY s.created_at DESC
 
 - NEXT TUESDAY
 
-```
-SELECT s.name, s.company_name,
-       s.assigned_to_name, ...
-FROM thrive_searches s
-WHERE 1=1 AND ... = %(client)s
-ORDER BY s.created_at DESC
-```
+- SELECT s.name, s.company_name,
+
+- s.assigned_to_name, ...
+
+- FROM thrive_searches s
+
+- WHERE 1=1 AND ... = %(client)s
+
+- ORDER BY s.created_at DESC
 
 - byte for byte
 
-```
-key = (template_id, parameters, expansions, variant)
- 
-Cacheable on that key — and the key only works because the query is a pure function of it. Caching isn’t a bonus feature. It’s evidence the architecture is what I claim.
-```
+- key = (template_id, parameters, expansions, variant)
+
+- Cacheable on that key — and the key only works because the query is a pure function of it. Caching isn’t a bonus feature. It’s evidence the architecture is what I claim.
 
 **Speaker notes**
 
@@ -473,9 +500,9 @@ Cacheable on that key — and the key only works because the query is a pure fun
 
 ---
 
-## Slide 14 · The Escape Hatch — The 5% you can’t template
+## Slide 13 · The Escape Hatch — The 5% you can’t template
 
-![Slide 14](slides/slide-14.png)
+![Slide 13](slides/slide-13.png)
 
 **On the slide**
 
@@ -499,7 +526,9 @@ Cacheable on that key — and the key only works because the query is a pure fun
 
 - Every flagged fallback is a template you haven’t written yet.
 
-- The fallback rate is a KPI, and it should trend toward zero. Your escape hatch should also be your backlog.
+- The fallback rate is a KPI, and it should trend toward zero.
+
+- Your escape hatch should also be your backlog.
 
 **Speaker notes**
 
@@ -509,43 +538,9 @@ Cacheable on that key — and the key only works because the query is a pure fun
 
 ---
 
-## Slide 15 · Honest Costs — What this costs you
+## Slide 14 · Takeaways — Three things, none about SQL
 
-![Slide 15](slides/slide-15.png)
-
-**On the slide**
-
-- Coverage grows linearly with human effort
-
-- A new result shape means someone writes SQL. That is a real ceiling.
-
-- The template library is a second schema
-
-- Kept in sync with the real one by hand.
-
-- Confident mis-routing is the scary failure
-
-- Bad generated SQL errors loudly. A wrong template returns a beautiful, correctly formatted table answering a question nobody asked.
-
-- Config-as-data has no type checker
-
-- A malformed template row degrades quietly rather than failing the build.
-
-- Two mitigations: thresholds shouldn’t be cliffs, and “ask a clarifying question” is a valid output.
-
-**Speaker notes**
-
-> If I only gave you the good parts you'd be right not to trust me. Four real costs.
->
-> The third is the interesting one and I'd think hard about it before adopting this. In text-to-SQL a mistake usually FAILS — bad column, syntax error, something red. Here a mis-route SUCCEEDS. You get a perfectly formatted table confidently answering the wrong question and nothing in the UI looks wrong. That's why every turn logs its template id and confidence: it's the only way to find these after the fact.
->
-> Two mitigations worth stealing. Confidence thresholds shouldn't be cliffs — if the model picks a valid template AND extracts a real filter but lands just under the bar, run it and log it as its own route class, because a vetted query beats freeform SQL. And when the shape is genuinely ambiguous the router may return a clarifying question. Asking is a valid output.
-
----
-
-## Slide 16 · Takeaways — Three things, none about SQL
-
-![Slide 16](slides/slide-16.png)
+![Slide 14](slides/slide-14.png)
 
 **On the slide**
 
@@ -567,7 +562,23 @@ Cacheable on that key — and the key only works because the query is a pure fun
 
 - The thing you fall back to should tell you what to build next.
 
-- The model chooses.   The code composes.
+- The model chooses. The code composes.
+
+**Speaker notes**
+
+> Three things to take home, none of which are about SQL.
+>
+> Constrain the output surface — a nine-field struct beats any amount of prompt engineering. Put the trust boundary after the model, in code that assumes the prompt failed. And make your escape hatch measurable so the thing you fall back to tells you what to build next.
+>
+> The model is doing something genuinely hard here — resolving pronouns against conversation state, translating business vocabulary, deciding when to ask instead of guess. That's real intelligence. It just isn't the intelligence that should be writing your WHERE clause.
+>
+> The model chooses. The code composes. Thank you.
+
+---
+
+## Slide 15 · Thanks — Questions
+
+![Slide 15](slides/slide-15.png)
 
 **Speaker notes**
 
