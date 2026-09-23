@@ -247,3 +247,7 @@ Slides, speaker notes and prose © John Ulett, licensed under
 
 The code snippets are short illustrative excerpts; consider them MIT if you want to lift
 them into something.
+
+**How to cite this talk:** Ulett, John. *Don't Let the Model Write the Query: Software
+architecture for repeatable chat responses over SQL data.* 2026.
+<https://github.com/johnnieTN2/dont-let-the-model-write-the-query>
