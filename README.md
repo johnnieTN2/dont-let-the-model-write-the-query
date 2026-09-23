@@ -235,3 +235,15 @@ state, translating business vocabulary, deciding when to ask instead of guess. T
 intelligence. It just isn't the intelligence that should be writing your `WHERE` clause.
 
 **The model chooses. The code composes.**
+
+---
+
+## License
+
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](LICENSE)
+
+Slides, speaker notes and prose © John Ulett, licensed under
+[CC BY 4.0](LICENSE) — share and adapt freely, including commercially, with attribution.
+
+The code snippets are short illustrative excerpts; consider them MIT if you want to lift
+them into something.
